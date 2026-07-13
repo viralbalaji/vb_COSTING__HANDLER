@@ -333,6 +333,7 @@
       <div class="output-box" id="timeOutputBox">
         <p>⌛ Time Remaining</p>
         <span class="output-val" id="timeResult">00:00</span>
+        <span id="timeEndLabel" style="width:100%;font-size:0.78rem;color:#4b6a8b;display:none;">🏁 Ends @ <strong id="timeEndValue"></strong></span>
       </div>
     </div>
   </div>
@@ -558,7 +559,8 @@
         // Validate weight comparison
         const isValidWeight = validateWeightComparison();
         if (!isValidWeight) {
-            timeResult.innerHTML = '<span style="color:#2563eb;font-weight:700;">00</span><span style="color:black;font-weight:400;">h</span> <span style="color:#2563eb;font-weight:700;">00</span><span style="color:black;font-weight:400;">m</span>';
+          timeResult.innerHTML = '<span style="color:#2563eb;font-weight:700;">00</span><span style="color:black;font-weight:400;">h</span> <span style="color:#2563eb;font-weight:700;">00</span><span style="color:black;font-weight:400;">m</span>';
+          document.getElementById('timeEndLabel').style.display = 'none';
           timeOutputBox.classList.add('error');
           return;
         }
@@ -575,6 +577,10 @@
         }
         timeResult.innerHTML = formatMinutesToHHMM(minutesNeeded);
         timeOutputBox.classList.remove('error');
+        const endDate = new Date(Date.now() + minutesNeeded * 60 * 1000);
+        const endStr = endDate.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true });
+        document.getElementById('timeEndValue').textContent = endStr;
+        document.getElementById('timeEndLabel').style.display = 'block';
       }
 
       // ----- update all -----
@@ -667,10 +673,13 @@ document.querySelectorAll('input, button').forEach((el) => {
       updateAll();
       setActiveMode('material');
 
-      // Update duration display every minute
+          // Update display every 30 seconds
       setInterval(() => {
         if (materialSection.classList.contains('active')) {
           computeMaterial();
+        }
+        if (timeSection.classList.contains('active')) {
+          computeTimeRemaining();
         }
       }, 30000);
 
@@ -680,7 +689,16 @@ document.querySelectorAll('input, button').forEach((el) => {
 
 
   //  13-07-2026  CLAUDE
- // 12/13-07-2026  GEMINI,DS,DS,DS  @ MJJB-INTERNATIONAL  __ O.V.VAGHASIYA
+ // 12/13-07-2026  GEMINI,DS,DS,DS  @ MJJB-INTERNATIONAL__ O.V.VAGHASIYA
+
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>
