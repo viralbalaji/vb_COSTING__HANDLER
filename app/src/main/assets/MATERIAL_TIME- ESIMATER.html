@@ -326,7 +326,8 @@
           ⚓ Total Weight (Kg)
           <span class="validation-error" id="totalWeightError">* Must be greater than piece weight</span>
         </label>
-        <input type="number" id="timeTotalKg" step="1" value="8" placeholder="Kg">
+        <input type="text" id="timeTotalKg" inputmode="decimal" value="8" onkeydown="if(!/[\d\.\s]/.test(event.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Enter'].includes(event.key)) event.preventDefault()">
+        <span class="time-info" id="totalWeightSumDisplay" style="display:none;"></span>
       </div>
 
       <div class="output-box" id="timeOutputBox">
@@ -460,7 +461,7 @@
           timeWeight.classList.remove('error');
         }
 
-        if (totalWeightKg <= 0) {
+        if (totalWeightKg <= 0 || isNaN(totalWeightKg)) {
           totalWeightError.style.display = 'inline';
           timeTotalKg.classList.add('error');
           isValid = false;
@@ -539,7 +540,16 @@
           return;
         }
 
-        const totalKg = parseFloat(timeTotalKg.value) || 0;
+        const parts = timeTotalKg.value.trim().split(/  +/);
+        const totalKg = parts.reduce((sum, v) => sum + (parseFloat(v) || 0), 0);
+        const sumDisplay = document.getElementById('totalWeightSumDisplay');
+        if (parts.length > 1 && totalKg > 0) {
+          const formula = parts.map(v => `<strong>${parseFloat(v) || 0}</strong>`).join(' + ');
+          sumDisplay.innerHTML = `${formula} = <strong style="color:#2563eb">${totalKg}</strong>Kg`;
+          sumDisplay.style.display = 'inline-block';
+        } else {
+          sumDisplay.style.display = 'none';
+        }
         if (totalKg <= 0) {
             timeResult.innerHTML = '<span style="color:#2563eb;font-weight:700;">00</span><span style="color:black;font-weight:400;">h</span> <span style="color:#2563eb;font-weight:700;">00</span><span style="color:black;font-weight:400;">m</span>';          timeOutputBox.classList.add('error');
           return;
@@ -596,33 +606,30 @@
         updateAll();
       });
 
-// ----- ENTER key: select value, then shift focus (mobile+desktop) -----
+// ----- Auto-select on focus (mobile + desktop) -----
+document.querySelectorAll('input').forEach((el) => {
+  if (el.type !== 'datetime-local' && el.type !== 'time' && el.type !== 'button') {
+    el.addEventListener('focus', function() {
+      const field = this;
+      setTimeout(() => {
+        field.select();
+        if (field.setSelectionRange) {
+          field.setSelectionRange(0, field.value.length);
+        }
+      }, 29);
+    });
+  }
+});
+
+// ----- ENTER key: shift focus (mobile + desktop) -----
 document.querySelectorAll('input, button').forEach((el) => {
   el.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      
-      // Select the current field's value - works on mobile
-      if (this.tagName === 'INPUT' && this.type !== 'button' && this.type !== 'datetime-local' && this.type !== 'time') {
-        setTimeout(() => {
-          this.select();
-          this.setSelectionRange(0, this.value.length);
-        }, 10);
-      }
-      
-      // Move to next focusable element
       const focusable = Array.from(document.querySelectorAll('input, button'));
       const idx = focusable.indexOf(this);
       if (idx !== -1 && idx < focusable.length - 1) {
-        setTimeout(() => {
-          const nextField = focusable[idx + 1];
-          nextField.focus();
-          // Select the next field's value too (if it's a number input)
-          if (nextField.tagName === 'INPUT' && nextField.type !== 'button' && nextField.type !== 'datetime-local' && nextField.type !== 'time') {
-            nextField.select();
-            nextField.setSelectionRange(0, nextField.value.length);
-          }
-        }, 50);
+        focusable[idx + 1].focus();
       } else {
         this.blur();
       }
@@ -670,8 +677,10 @@ document.querySelectorAll('input, button').forEach((el) => {
     })();
 
 
-    
- // 12/13-07-2026  GEMINI,DS,DS,DS
+
+
+  //  13-07-2026  CLAUDE
+ // 12/13-07-2026  GEMINI,DS,DS,DS  @ MJJB-INTERNATIONAL  __ O.V.VAGHASIYA
 </script>
 </body>
 </html>
