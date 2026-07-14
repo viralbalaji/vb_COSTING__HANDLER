@@ -425,7 +425,7 @@
       const timeSection = document.getElementById('timeSection');
 
       // ----- product presets -----
-      const dataPresets = {
+      const DEFAULT_PRESETS_M = {
         "125 ml":      10,
         "150 ml":      10.40,
         "250 ml":      12,
@@ -438,6 +438,10 @@
         "750 ml":      24.84,
         "1000 ml":     28.70
       };
+      const dataPresets = (function() {
+        try { return JSON.parse(localStorage.getItem('presets_material')) || DEFAULT_PRESETS_M; }
+        catch(e) { return DEFAULT_PRESETS_M; }
+      })();
 
       function applyPreset(selectEl, weightInputEl) {
         const val = dataPresets[selectEl.value];
@@ -832,6 +836,11 @@ document.querySelectorAll('input, button').forEach((el) => {
       }, 38000);
 
     })();
+
+
+
+
+  //  14-07-2026  CLAUDE
   //  13-07-2026  CLAUDE,CLAUDE
  // 12/13-07-2026  GEMINI,DS,DS,DS  @ MJJB-INTERNATIONAL__ O.V.VAGHASIYA
      </script>
