@@ -65,10 +65,12 @@
 
 
     <header class="header">
-      <img src="RUBY rrrbb RMC.svg" alt="Header Image">
+      <img id="logo-img" src="RUBY rrrbb RMC.svg" alt="Header Image">
 
 
-    <h1>Website Shortcuts</h1>
+      <h1>Website Shortcuts</h1>
+
+      
     <div class="container">
         
         
@@ -254,10 +256,44 @@
         }
 
 
+// ── LOGO HOLD 1s → IMPORT/EXPORT DIALOG ──
+(function() {
+          const logo = document.getElementById('logo-img');
+          let t = null;
+          function sh(e) {
+            t = setTimeout(() => { t = null; openIODialog(); }, 1000);
+          }
+          function ch() { if (t) { clearTimeout(t); t = null; } }
+          logo.addEventListener('mousedown',  sh);
+          logo.addEventListener('touchstart', sh, { passive: true });
+          logo.addEventListener('mouseup',    ch);
+          logo.addEventListener('touchend',   ch);
+          logo.addEventListener('mouseleave', ch);
+          logo.addEventListener('contextmenu', e => e.preventDefault());
+        })();
+
+        function openIODialog() {
+          document.getElementById('ioDialog').showModal();
+        }
       </script>
 
+
+
+
+      <!-- IMPORT/EXPORT DIALOG -->
+      <dialog id="ioDialog" style="border-radius:14px;padding:28px 24px;min-width:280px;font-family:Arial;background:#fff;border:2px solid #ccc;text-align:center;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <button onclick="doExport()" style="padding:11px 0;border-radius:8px;background:#2a7a2a;color:#fff;border:none;cursor:pointer;font-weight:bold;font-size:15px;">📤 Export</button>
+          <button onclick="document.getElementById('io-file-input').click();document.getElementById('ioDialog').close();" style="padding:11px 0;border-radius:8px;background:#2a4a9a;color:#fff;border:none;cursor:pointer;font-weight:bold;font-size:15px;">📥 Import</button>
+          <button onclick="document.getElementById('ioDialog').close()" style="padding:9px 0;border-radius:8px;border:1px solid rgb(219, 62, 65);cursor:pointer;font-size:14px;">Cancel</button>
+        </div>
+      </dialog>
+      <input type="file" id="io-file-input" accept=".json" style="display:none;">
+
          </body>
+
   <!--  15-07-2026 CLAUDE  -->
   <!--  14-07-2026 CLAUDE  -->
   <!--  5-6-2025 **CG  - 13-07-2026 CLAUDE  -->
+
              </html>
