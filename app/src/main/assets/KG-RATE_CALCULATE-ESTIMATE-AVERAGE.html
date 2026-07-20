@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KG × Rate Calculator</title>
+<style>
+  :root{
+    --bg:#12181a;
+    --panel:#1b2427;
+    --row-alt:#202b2e;
+    --border:#2c3a3e;
+    --text:#eef2ee;
+    --muted:#8fa19f;
+    --gold:#d4af37;
+    --gold-soft:#e9c85c;
+    --accent:#3f9e88;
+    --danger:#c0554b;
+    --focus:#4fbfa4;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;padding:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    width:100%;
+    overflow-x:hidden;
+  }
+  body{
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+  header{
+    padding:18px 16px 12px;
+    text-align:center;
+    border-bottom:1px solid var(--border);
+  }
+  header h1{
+    margin:0;
+    font-size:19px;
+    letter-spacing:0.03em;
+    font-weight:700;
+    color:var(--gold-soft);
+  }
+  header p{
+    margin:4px 0 0;
+    font-size:12px;
+    color:var(--muted);
+  }
+  main{
+    flex:1;
+    width:100%;
+    max-width:520px;
+    margin:0 auto;
+    padding:12px 10px 100px;
+  }
+  .col-labels{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1.15fr 30px;
+    gap:6px;
+    padding:0 4px 6px;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .col-labels span:nth-child(3){color:var(--gold-soft);}
+  #rows{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .row{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1.15fr 30px;
+    gap:6px;
+    align-items:center;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:6px;
+  }
+  .row:nth-child(even){background:var(--row-alt);}
+  .row input{
+    width:100%;
+    background:#0f1517;
+    border:1px solid var(--border);
+    color:var(--text);
+    font-size:16px;
+    padding:10px 8px;
+    border-radius:8px;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+    min-width:0;
+  }
+  .row input:focus{
+    outline:none;
+    border-color:var(--focus);
+    box-shadow:0 0 0 2px rgba(79,191,164,0.25);
+  }
+  .row .rupee-box{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:2px;
+    background:#0f1517;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 8px;
+    min-height:20px;
+  }
+  .row .rupee-box .sym{
+    font-weight:800;
+    color:var(--gold);
+    font-size:15px;
+  }
+  .row .rupee-box .val{
+    font-weight:700;
+    color:var(--gold-soft);
+    font-variant-numeric:tabular-nums;
+    font-size:16px;
+  }
+  .del-btn{
+    background:transparent;
+    border:none;
+    color:var(--muted);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    padding:6px;
+    border-radius:6px;
+  }
+  .del-btn:active{background:rgba(192,85,75,0.2);color:var(--danger);}
+
+  #addRowBtn{
+    margin-top:10px;
+    width:100%;
+    padding:12px;
+    background:transparent;
+    border:1.5px dashed var(--border);
+    color:var(--muted);
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  #addRowBtn:active{border-color:var(--accent);color:var(--accent);}
+
+  .summary{
+    position:fixed;
+    left:0;right:0;bottom:0;
+    background:linear-gradient(180deg, rgba(18,24,26,0.4), var(--bg) 22%);
+    padding:14px 12px calc(14px + env(safe-area-inset-bottom));
+    display:flex;
+    justify-content:center;
+  }
+  .summary-card{
+    width:100%;
+    max-width:520px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .summary-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .summary-line .num{
+    color:var(--text);
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .summary-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding-top:8px;
+    border-top:1px solid var(--border);
+  }
+  .summary-total .label{
+    font-size:13px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .summary-total .amount{
+    font-size:22px;
+    font-weight:800;
+    color:var(--panel);
+    font-variant-numeric:tabular-nums;
+  }
+  .summary-total .amount .sym{color:var(--panel);margin-right:2px;}
+  .rate-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .rate-line .amount{
+    font-weight:700;
+    color:var(--gold-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  .rate-line .amount .sym{color:var(--gold);margin-right:2px;}
+
+  @media (max-width:360px){
+    .col-labels, .row{grid-template-columns: 1fr 1fr 1fr 26px;}
+    .row input{font-size:15px;padding:9px 6px;}
+  }
+</style>
+</head>
+<body>
+
+
+<main>
+  <div class="col-labels">
+    <span>KG</span>
+    <span>Rate</span>
+    <span>Rupees</span>
+    <span></span>
+  </div>
+  <div id="rows"></div>
+  <button id="addRowBtn" type="button" onclick="addRow()">+ Add Row</button>
+</main>
+
+<div class="summary">
+  <div class="summary-card">
+    <div class="summary-line">
+      <span>Total KG</span>
+      <span class="num" id="totalKg">0.00</span>
+    </div>
+    <div class="rate-line">
+      <span>Rupee / KG</span>
+      <span class="amount"><span class="sym">₹</span><span id="avgRate">0.00</span></span>
+    </div>
+    <div class="summary-total">
+      <span class="amount"><span class="sym">₹</span><span id="totalRupees">0.00</span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+let rowCount = 0;
+
+function round2(n){
+  return Math.round((n + Number.EPSILON) * 100) / 100;
+}
+
+function fmt(n){
+  if (!isFinite(n)) return "0.00";
+  return round2(n).toFixed(2);
+}
+
+function addRow(focusKg = true){
+  rowCount++;
+  const id = rowCount;
+  const rowsEl = document.getElementById('rows');
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <input type="text" inputmode="decimal" class="kg-input" placeholder="0.00" data-id="${id}">
+    <input type="text" inputmode="decimal" class="rate-input" placeholder="0.00" data-id="${id}">
+    <div class="rupee-box"><span class="sym">₹</span><span class="val rupee-out" data-id="${id}">0.00</span></div>
+    <button type="button" class="del-btn" onclick="deleteRow(${id})">✕</button>
+  `;
+  rowsEl.appendChild(row);
+
+  const kgInput = row.querySelector('.kg-input');
+  const rateInput = row.querySelector('.rate-input');
+
+  kgInput.addEventListener('input', () => { sanitize(kgInput); calcRow(id); calcTotals(); });
+  rateInput.addEventListener('input', () => { sanitize(rateInput); calcRow(id); calcTotals(); });
+
+  kgInput.addEventListener('focus', () => { kgInput.select(); });
+  rateInput.addEventListener('focus', () => { rateInput.select(); });
+
+  kgInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      rateInput.focus();
+      rateInput.select();
+    }
+    if (e.key === 'Backspace'){
+      if (kgInput.value.trim() === ''){
+        const count = parseInt(kgInput.dataset.bsCount || '0', 10) + 1;
+        kgInput.dataset.bsCount = String(count);
+        if (count >= 2){
+          const prevRow = row.previousElementSibling;
+          const rateEmpty = rateInput.value.trim() === '';
+          if (prevRow && rateEmpty){
+            e.preventDefault();
+            const prevRate = prevRow.querySelector('.rate-input');
+            row.remove();
+            calcTotals();
+            prevRate.focus();
+          }
+          kgInput.dataset.bsCount = '0';
+        }
+      } else {
+        kgInput.dataset.bsCount = '0';
+      }
+    } else {
+      kgInput.dataset.bsCount = '0';
+    }
+  });
+
+  rateInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      const nextRow = row.nextElementSibling;
+      if (nextRow){
+        const nextKg = nextRow.querySelector('.kg-input');
+        nextKg.focus();
+        nextKg.select();
+      } else {
+        addRow();
+      }
+    }
+    if (e.key === 'Backspace'){
+      if (rateInput.value.trim() === ''){
+        const count = parseInt(rateInput.dataset.bsCount || '0', 10) + 1;
+        rateInput.dataset.bsCount = String(count);
+        if (count >= 2){
+          e.preventDefault();
+          kgInput.focus();
+          rateInput.dataset.bsCount = '0';
+        }
+      } else {
+        rateInput.dataset.bsCount = '0';
+      }
+    } else {
+      rateInput.dataset.bsCount = '0';
+    }
+  });
+
+  if (focusKg){
+    setTimeout(() => kgInput.focus(), 30);
+  }
+
+  calcTotals();
+}
+
+function sanitize(input){
+  let v = input.value;
+  // allow digits and one decimal point, max 2 decimals
+  v = v.replace(/[^0-9.]/g, '');
+  const parts = v.split('.');
+  if (parts.length > 2){
+    v = parts[0] + '.' + parts.slice(1).join('');
+  }
+  const dotIdx = v.indexOf('.');
+  if (dotIdx !== -1){
+    const intPart = v.slice(0, dotIdx);
+    let decPart = v.slice(dotIdx + 1);
+    if (decPart.length > 2) decPart = decPart.slice(0, 2);
+    v = intPart + '.' + decPart;
+  }
+  input.value = v;
+}
+
+function deleteRow(id){
+  const row = document.querySelector(`.row[data-id="${id}"]`);
+  if (row) row.remove();
+  calcTotals();
+}
+
+function calcRow(id){
+  const kgInput = document.querySelector(`.kg-input[data-id="${id}"]`);
+  const rateInput = document.querySelector(`.rate-input[data-id="${id}"]`);
+  const out = document.querySelector(`.rupee-out[data-id="${id}"]`);
+  const kg = parseFloat(kgInput.value) || 0;
+  const rate = parseFloat(rateInput.value) || 0;
+  const adjustedRate = rate * 1.09;
+  const total = round2(kg * adjustedRate);
+  out.textContent = fmt(total);
+}
+
+function calcTotals(){
+  const kgInputs = document.querySelectorAll('.kg-input');
+  const rateOutputs = document.querySelectorAll('.rupee-out');
+  let totalKg = 0;
+  let totalRupees = 0;
+
+  kgInputs.forEach(inp => {
+    totalKg += parseFloat(inp.value) || 0;
+  });
+  rateOutputs.forEach(out => {
+    totalRupees += parseFloat(out.textContent) || 0;
+  });
+
+  document.getElementById('totalKg').textContent = fmt(totalKg);
+  document.getElementById('totalRupees').textContent = fmt(totalRupees);
+
+  const avg = totalKg > 0 ? totalRupees / totalKg : 0;
+  document.getElementById('avgRate').textContent = fmt(avg);
+}
+addRow(false);
+addRow(false);
+setTimeout(() => {
+  const firstKg = document.querySelector('.kg-input');
+  if (firstKg) firstKg.focus();
+}, 56);
+  //  20-07-2026  CLAUDE,CLAUDE
+</script>
+</body>
+</html>
